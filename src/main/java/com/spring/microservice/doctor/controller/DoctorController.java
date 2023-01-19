@@ -119,6 +119,18 @@ public class DoctorController {
 				.findAppointmentScheduleByDOCTOR_ID(doctorDetails.getID());
 		return new Doctor(doctorLogin, doctorDetails, appointmentScheduleList);
 	}
+	
+	@GetMapping("/get/id/{id}")
+	public Doctor getDoctorById(@PathVariable("id") String id) {
+		try {
+			Doctor doctor=new Doctor();
+			doctor.setDD(doctorDetailsRepo.findById(id).get());
+			doctor.setAS(appointmetScheduleRepo.findAppointmentScheduleByDOCTOR_ID(id));
+			return doctor;
+		}catch(Exception x) {
+			return null;
+		}
+	}
 
 	@GetMapping("/validate/{token}")
 	public Boolean checkTokenValidity(@PathVariable("token") String token) {
