@@ -66,6 +66,7 @@ public class DoctorController {
 			doctorDetails.setEMAIL_ID(doctorLogin.getEMAIL_ID());
 			doctorDetails.setTAGS(doctorDetails.getFIRST_NAME() + "," + doctorDetails.getLAST_NAME() + ","
 					+ doctorDetails.getSPECIALIZATION());
+			doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace(",","|"));
 			doctorLoginRepo.save(doctorLogin);
 			doctorDetailsRepo.save(doctorDetails);
 			for (AppointmentSchedule as : appointmentScheduleList) {

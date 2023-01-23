@@ -14,12 +14,11 @@ public class DoctorMicroserviceApplication {
 	}
 
 	@Bean
-	public WebMvcConfigurer CorsConfigurer() {
+	 WebMvcConfigurer CorsConfigurer() {
 		return new WebMvcConfigurer() {
 
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				// TODO Auto-generated method stub
 				WebMvcConfigurer.super.addCorsMappings(registry);
 				registry.addMapping("/**").allowedOrigins("http://localhost:4200").allowedMethods("*").maxAge(3600L)
 						.allowedHeaders("*").exposedHeaders("Authorization").allowCredentials(true);
