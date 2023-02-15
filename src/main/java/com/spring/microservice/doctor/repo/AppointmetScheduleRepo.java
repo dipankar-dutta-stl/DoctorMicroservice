@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface AppointmetScheduleRepo extends JpaRepository<AppointmentSchedule,String> {
-    @Query(value="select * from appointment_schedule where doctor_id=?",nativeQuery = true)
+    @Query(value="select * from appointment_schedule where doctor_id=? order by schedule_time_start asc",nativeQuery = true)
     public List<AppointmentSchedule> findAppointmentScheduleByDOCTOR_ID(String id);
 }
