@@ -107,6 +107,7 @@ public class DoctorController {
 		for (DoctorDetails d : doctorDetailsList) {
 			List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
 					.findAppointmentScheduleByDOCTOR_ID(d.getID());
+			d.setCHEMBAR_ADDRESS(d.getCHEMBAR_ADDRESS().replace("|",","));
 			doctorList.add(new Doctor(null, d, appointmentScheduleList));
 		}
 		return doctorList;
@@ -116,6 +117,7 @@ public class DoctorController {
 	public Doctor getDoctor(@PathVariable("email") String email) {
 		DoctorLogin doctorLogin = doctorLoginRepo.findById(email).get();
 		DoctorDetails doctorDetails = doctorDetailsRepo.findByEMAIL_ID(email);
+		doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace("|",","));
 		List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
 				.findAppointmentScheduleByDOCTOR_ID(doctorDetails.getID());
 		return new Doctor(doctorLogin, doctorDetails, appointmentScheduleList);
@@ -125,7 +127,9 @@ public class DoctorController {
 	public Doctor getDoctorById(@PathVariable("id") String id) {
 		try {
 			Doctor doctor=new Doctor();
-			doctor.setDD(doctorDetailsRepo.findById(id).get());
+			DoctorDetails doctorDetails=doctorDetailsRepo.findById(id).get();
+			doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace("|",","));
+			doctor.setDD(doctorDetails);
 			doctor.setAS(appointmetScheduleRepo.findAppointmentScheduleByDOCTOR_ID(id));
 			return doctor;
 		}catch(Exception x) {
