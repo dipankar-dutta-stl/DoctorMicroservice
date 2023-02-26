@@ -20,34 +20,34 @@ import com.spring.microservice.doctor.security.DoctorLoginDetailsService;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-	@Autowired
-	private JwtUtills jwtUtills;
+    @Autowired
+    private JwtUtills jwtUtills;
 
-	@Autowired
-	private DoctorLoginDetailsService doctorLoginDetailsService;
+    @Autowired
+    private DoctorLoginDetailsService doctorLoginDetailsService;
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		String auth = request.getHeader("Authorization");
-		String token = null;
-		String email = null;
-		if (auth != null && auth.startsWith("Bearer")) {
-			token = auth.substring(6);
-			email = jwtUtills.getUsernameFromToken(token);
-		}
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        String auth = request.getHeader("Authorization");
+        String token = null;
+        String email = null;
+        if (auth != null && auth.startsWith("Bearer")) {
+            token = auth.substring(6);
+            email = jwtUtills.getUsernameFromToken(token);
+        }
 
-		if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-			DoctorLoginDetails currentUser = (DoctorLoginDetails) doctorLoginDetailsService.loadUserByUsername(email);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            DoctorLoginDetails currentUser = (DoctorLoginDetails) doctorLoginDetailsService.loadUserByUsername(email);
 
-			UsernamePasswordAuthenticationToken userAuthToken = new UsernamePasswordAuthenticationToken(currentUser,
-					null, currentUser.getAuthorities());
-			userAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-			SecurityContextHolder.getContext().setAuthentication(userAuthToken);
-		}
+            UsernamePasswordAuthenticationToken userAuthToken = new UsernamePasswordAuthenticationToken(currentUser,
+                    null, currentUser.getAuthorities());
+            userAuthToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(userAuthToken);
+        }
 
-		filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response);
 
-	}
+    }
 
 }

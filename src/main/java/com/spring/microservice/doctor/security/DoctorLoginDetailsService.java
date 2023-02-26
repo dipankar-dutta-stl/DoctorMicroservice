@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 public class DoctorLoginDetailsService implements UserDetailsService {
     @Autowired
     DoctorLoginRepo doctorLoginRepo;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        DoctorLogin doctorLogin=doctorLoginRepo.findById(username).get();
-        if(doctorLogin!=null){
+        DoctorLogin doctorLogin = doctorLoginRepo.findById(username).get();
+        if (doctorLogin != null) {
             return new DoctorLoginDetails(doctorLogin);
         }
         return null;

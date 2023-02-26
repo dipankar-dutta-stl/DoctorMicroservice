@@ -15,12 +15,12 @@ public class AppointmentSchedule {
     public AppointmentSchedule() {
     }
 
-    public AppointmentSchedule(String ID, String DOCTOR_ID, String SCHEDULE_DAY, String SCHEDULE_TIME_START,String SCHEDULE_TIME_END) {
+    public AppointmentSchedule(String ID, String DOCTOR_ID, String SCHEDULE_DAY, String SCHEDULE_TIME_START, String SCHEDULE_TIME_END) {
         this.ID = ID;
         this.DOCTOR_ID = DOCTOR_ID;
         this.SCHEDULE_DAY = SCHEDULE_DAY;
         this.SCHEDULE_TIME_START = SCHEDULE_TIME_START;
-        this.SCHEDULE_TIME_END=SCHEDULE_TIME_END;
+        this.SCHEDULE_TIME_END = SCHEDULE_TIME_END;
     }
 
     public String getID() {
@@ -48,31 +48,27 @@ public class AppointmentSchedule {
     }
 
 
-    
-    
-    
-
     public String getSCHEDULE_TIME_START() {
-		return SCHEDULE_TIME_START;
-	}
+        return SCHEDULE_TIME_START;
+    }
 
-	public void setSCHEDULE_TIME_START(String sCHEDULE_TIME_START) {
-		SCHEDULE_TIME_START = sCHEDULE_TIME_START;
-	}
+    public void setSCHEDULE_TIME_START(String sCHEDULE_TIME_START) {
+        SCHEDULE_TIME_START = sCHEDULE_TIME_START;
+    }
 
-	public String getSCHEDULE_TIME_END() {
-		return SCHEDULE_TIME_END;
-	}
+    public String getSCHEDULE_TIME_END() {
+        return SCHEDULE_TIME_END;
+    }
 
-	public void setSCHEDULE_TIME_END(String sCHEDULE_TIME_END) {
-		SCHEDULE_TIME_END = sCHEDULE_TIME_END;
-	}
+    public void setSCHEDULE_TIME_END(String sCHEDULE_TIME_END) {
+        SCHEDULE_TIME_END = sCHEDULE_TIME_END;
+    }
 
-	@Override
-	public String toString() {
-		return "AppointmentSchedule [ID=" + ID + ", DOCTOR_ID=" + DOCTOR_ID + ", SCHEDULE_DAY=" + SCHEDULE_DAY
-				+ ", SCHEDULE_TIME_START=" + SCHEDULE_TIME_START + ", SCHEDULE_TIME_END=" + SCHEDULE_TIME_END + "]";
-	}
+    @Override
+    public String toString() {
+        return "AppointmentSchedule [ID=" + ID + ", DOCTOR_ID=" + DOCTOR_ID + ", SCHEDULE_DAY=" + SCHEDULE_DAY
+                + ", SCHEDULE_TIME_START=" + SCHEDULE_TIME_START + ", SCHEDULE_TIME_END=" + SCHEDULE_TIME_END + "]";
+    }
 
-	
+
 }

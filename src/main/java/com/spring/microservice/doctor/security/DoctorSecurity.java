@@ -20,36 +20,36 @@ import com.spring.microservice.doctor.jwt.JwtFilter;
 @EnableWebSecurity
 @Configuration
 public class DoctorSecurity extends WebSecurityConfigurerAdapter {
-	@Autowired
-	DoctorLoginDetailsService doctorLoginDetailsService;
+    @Autowired
+    DoctorLoginDetailsService doctorLoginDetailsService;
 
-	@Autowired
-	JwtFilter jwtfilter;
+    @Autowired
+    JwtFilter jwtfilter;
 
-	@Bean
-	public AuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(doctorLoginDetailsService);
-		authProvider.setPasswordEncoder(new BCryptPasswordEncoder());
-		return authProvider;
-	}
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(doctorLoginDetailsService);
+        authProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+        return authProvider;
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().cors().disable().authorizeRequests()
-				.antMatchers("/api/v1/doctor/add", "/api/v1/doctor/authenticate", "/api/v1/doctor/validate/{token}",
-						"/api/v1/doctor/alldoctors","/api/v1/doctor/get/id/{id}")
-				.permitAll().antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated().and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http.addFilterBefore(jwtfilter, UsernamePasswordAuthenticationFilter.class);
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable().cors().disable().authorizeRequests()
+                .antMatchers("/api/v1/doctor/add", "/api/v1/doctor/authenticate", "/api/v1/doctor/validate/{token}",
+                        "/api/v1/doctor/alldoctors", "/api/v1/doctor/doctors","/api/v1/doctor/doctors/loc&spcl","/api/v1/doctor/get/id/{id}")
+                .permitAll().antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated().and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(jwtfilter, UsernamePasswordAuthenticationFilter.class);
 
-	}
+    }
 
-	@Override
-	@Bean
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		// TODO Auto-generated method stub
-		return super.authenticationManagerBean();
-	}
+    @Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        // TODO Auto-generated method stub
+        return super.authenticationManagerBean();
+    }
 
 }

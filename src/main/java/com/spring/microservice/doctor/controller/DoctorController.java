@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,160 +37,187 @@ import com.spring.microservice.doctor.security.DoctorLoginDetailsService;
 @RequestMapping("/api/v1/doctor")
 public class DoctorController {
 
-	@Autowired
-	DoctorLoginRepo doctorLoginRepo;
-	@Autowired
-	DoctorDetailsRepo doctorDetailsRepo;
-	@Autowired
-	AppointmetScheduleRepo appointmetScheduleRepo;
-	@Autowired
-	AuthenticationManager authenticationManager;
-	@Autowired
-	DoctorLoginDetailsService doctorLoginDetailsService;
-	@Autowired
-	JwtUtills jwtUtills;
+    @Autowired
+    DoctorLoginRepo doctorLoginRepo;
+    @Autowired
+    DoctorDetailsRepo doctorDetailsRepo;
+    @Autowired
+    AppointmetScheduleRepo appointmetScheduleRepo;
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    DoctorLoginDetailsService doctorLoginDetailsService;
+    @Autowired
+    JwtUtills jwtUtills;
 
-	@PostMapping("/add")
-	public String addDoctor(@RequestBody Doctor D) {
+    @PostMapping("/add")
+    public String addDoctor(@RequestBody Doctor D) {
 
-		DoctorLogin doctorLogin = D.getDL();
-		DoctorDetails doctorDetails = D.getDD();
-		List<AppointmentSchedule> appointmentScheduleList = D.getAS();
-		try {
-			DoctorLogin isDoctorAvailabel = doctorLoginRepo.findById(doctorLogin.getEMAIL_ID()).get();
-		} catch (java.util.NoSuchElementException x) {
-			BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-			UUID id = UUID.randomUUID();
-			String encryptPass = bCryptPasswordEncoder.encode(doctorLogin.getPASSWORD());
-			doctorLogin.setPASSWORD(encryptPass);
-			doctorDetails.setID(id.toString());
-			doctorDetails.setEMAIL_ID(doctorLogin.getEMAIL_ID());
-			doctorDetails.setTAGS(doctorDetails.getFIRST_NAME() + "," + doctorDetails.getLAST_NAME() + ","
-					+ doctorDetails.getSPECIALIZATION());
-			doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace(",","|"));
-			doctorLoginRepo.save(doctorLogin);
-			doctorDetailsRepo.save(doctorDetails);
-			for (AppointmentSchedule as : appointmentScheduleList) {
-				as.setID(UUID.randomUUID().toString());
-				as.setDOCTOR_ID(doctorDetails.getID());
-				appointmetScheduleRepo.save(as);
-			}
-			return "REGISTRATION SUCCESSFULL";
-		}
-		return "YOU ARE ALREADY REGISTERED";
+        DoctorLogin doctorLogin = D.getDL();
+        DoctorDetails doctorDetails = D.getDD();
+        List<AppointmentSchedule> appointmentScheduleList = D.getAS();
+        try {
+            DoctorLogin isDoctorAvailabel = doctorLoginRepo.findById(doctorLogin.getEMAIL_ID()).get();
+        } catch (java.util.NoSuchElementException x) {
+            BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+            UUID id = UUID.randomUUID();
+            String encryptPass = bCryptPasswordEncoder.encode(doctorLogin.getPASSWORD());
+            doctorLogin.setPASSWORD(encryptPass);
+            doctorDetails.setID(id.toString());
+            doctorDetails.setEMAIL_ID(doctorLogin.getEMAIL_ID());
+            doctorDetails.setTAGS(doctorDetails.getFIRST_NAME() + "," + doctorDetails.getLAST_NAME() + ","
+                    + doctorDetails.getSPECIALIZATION());
+            doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace(",", "|"));
+            doctorLoginRepo.save(doctorLogin);
+            doctorDetailsRepo.save(doctorDetails);
+            for (AppointmentSchedule as : appointmentScheduleList) {
+                as.setID(UUID.randomUUID().toString());
+                as.setDOCTOR_ID(doctorDetails.getID());
+                appointmetScheduleRepo.save(as);
+            }
+            return "REGISTRATION SUCCESSFULL";
+        }
+        return "YOU ARE ALREADY REGISTERED";
 
-	}
+    }
 
-	@PostMapping("/authenticate")
-	public String authenticateDoctor(@RequestBody DoctorLogin doctorLogin) {
-		try {
-			Authentication authentication = authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(doctorLogin.getEMAIL_ID(), doctorLogin.getPASSWORD()));
-			if (authentication.isAuthenticated()) {
-				SecurityContextHolder.getContext().setAuthentication(authentication);
-				DoctorLoginDetails doctorLoginDetails = (DoctorLoginDetails) doctorLoginDetailsService
-						.loadUserByUsername(doctorLogin.getEMAIL_ID());
-				String TOKEN = jwtUtills.generateJwtToken(doctorLoginDetails);
-				return TOKEN;
-			} else {
-				return "LOGIN FAILED";
-			}
-		} catch (Exception ex) {
-			return "LOGIN FAILED";
-		}
+    @PostMapping("/authenticate")
+    public String authenticateDoctor(@RequestBody DoctorLogin doctorLogin) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(doctorLogin.getEMAIL_ID(), doctorLogin.getPASSWORD()));
+            if (authentication.isAuthenticated()) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                DoctorLoginDetails doctorLoginDetails = (DoctorLoginDetails) doctorLoginDetailsService
+                        .loadUserByUsername(doctorLogin.getEMAIL_ID());
+                String TOKEN = jwtUtills.generateJwtToken(doctorLoginDetails);
+                return TOKEN;
+            } else {
+                return "LOGIN FAILED";
+            }
+        } catch (Exception ex) {
+            return "LOGIN FAILED";
+        }
 
-	}
+    }
 
-	@GetMapping("/alldoctors")
-	public List<Doctor> getAllDoctors() {
-		List<Doctor> doctorList = new ArrayList<Doctor>();
-		List<DoctorDetails> doctorDetailsList = doctorDetailsRepo.findAll();
-		for (DoctorDetails d : doctorDetailsList) {
-			List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
-					.findAppointmentScheduleByDOCTOR_ID(d.getID());
-			d.setCHEMBAR_ADDRESS(d.getCHEMBAR_ADDRESS().replace("|",","));
-			doctorList.add(new Doctor(null, d, appointmentScheduleList));
-		}
-		return doctorList;
-	}
+    @GetMapping("/alldoctors")
+    public List<Doctor> getAllDoctors() {
+        List<Doctor> doctorList = new ArrayList<Doctor>();
+        List<DoctorDetails> doctorDetailsList = doctorDetailsRepo.findAll();
+        for (DoctorDetails d : doctorDetailsList) {
+            List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
+                    .findAppointmentScheduleByDOCTOR_ID(d.getID());
+            d.setCHEMBAR_ADDRESS(d.getCHEMBAR_ADDRESS().replace("|", ","));
+            doctorList.add(new Doctor(null, d, appointmentScheduleList));
+        }
+        return doctorList;
+    }
 
-	@GetMapping("/get/{email}")
-	public Doctor getDoctor(@PathVariable("email") String email) {
-		DoctorLogin doctorLogin = doctorLoginRepo.findById(email).get();
-		DoctorDetails doctorDetails = doctorDetailsRepo.findByEMAIL_ID(email);
-		doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace("|",","));
-		List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
-				.findAppointmentScheduleByDOCTOR_ID(doctorDetails.getID());
-		return new Doctor(doctorLogin, doctorDetails, appointmentScheduleList);
-	}
-	
-	@GetMapping("/get/id/{id}")
-	public Doctor getDoctorById(@PathVariable("id") String id) {
-		try {
-			Doctor doctor=new Doctor();
-			DoctorDetails doctorDetails=doctorDetailsRepo.findById(id).get();
-			doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace("|",","));
-			doctor.setDD(doctorDetails);
-			doctor.setAS(appointmetScheduleRepo.findAppointmentScheduleByDOCTOR_ID(id));
-			return doctor;
-		}catch(Exception x) {
-			return null;
-		}
-	}
+    @GetMapping("/doctors")
+    public List<Doctor> getAllDoctorsByLocation(@Param("loc") String loc) {
+        List<Doctor> doctorList = new ArrayList<Doctor>();
+        List<DoctorDetails> doctorDetailsList = doctorDetailsRepo.findDoctorByLocation(loc);
+        for (DoctorDetails d : doctorDetailsList) {
+            List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
+                    .findAppointmentScheduleByDOCTOR_ID(d.getID());
+            d.setCHEMBAR_ADDRESS(d.getCHEMBAR_ADDRESS().replace("|", ","));
+            doctorList.add(new Doctor(null, d, appointmentScheduleList));
+        }
+        return doctorList;
+    }
 
-	@GetMapping("/validate/{token}")
-	public Boolean checkTokenValidity(@PathVariable("token") String token) {
-		try {
-			String username = jwtUtills.getUsernameFromToken(token);
-			DoctorLoginDetails doctorLoginDetails = (DoctorLoginDetails) doctorLoginDetailsService
-					.loadUserByUsername(username);
-			Boolean isValid = jwtUtills.validateJwtToken(token, doctorLoginDetails);
-			return isValid;
-		} catch (Exception x) {
-			return false;
-		}
-	}
 
-	@PostMapping("/addschedule")
-	public String addAppointmetSchedule(@RequestBody AppointmentSchedule as) {
-		UUID appointment_ID = UUID.randomUUID();
-		as.setID(appointment_ID.toString());
-		appointmetScheduleRepo.save(as);
-		return "SUCCESSFULLY ADDED";
+    @GetMapping("/doctors/loc&spcl")
+    public List<Doctor> getAllDoctorsByLocationAndSpcl(@Param("loc") String loc,@Param("spcl") String spcl) {
+        List<Doctor> doctorList = new ArrayList<Doctor>();
+        List<DoctorDetails> doctorDetailsList = doctorDetailsRepo.findDoctorByLocationAndSpecialization(loc,spcl);
+        for (DoctorDetails d : doctorDetailsList) {
+            List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
+                    .findAppointmentScheduleByDOCTOR_ID(d.getID());
+            d.setCHEMBAR_ADDRESS(d.getCHEMBAR_ADDRESS().replace("|", ","));
+            doctorList.add(new Doctor(null, d, appointmentScheduleList));
+        }
+        return doctorList;
+    }
 
-	}
+    @GetMapping("/get/{email}")
+    public Doctor getDoctor(@PathVariable("email") String email) {
+        DoctorLogin doctorLogin = doctorLoginRepo.findById(email).get();
+        DoctorDetails doctorDetails = doctorDetailsRepo.findByEMAIL_ID(email);
+        doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace("|", ","));
+        List<AppointmentSchedule> appointmentScheduleList = appointmetScheduleRepo
+                .findAppointmentScheduleByDOCTOR_ID(doctorDetails.getID());
+        return new Doctor(doctorLogin, doctorDetails, appointmentScheduleList);
+    }
 
-	@PutMapping("/updateschedule")
-	public String updateAppointmetSchedule(@RequestBody AppointmentSchedule as) {
-		try {
-			appointmetScheduleRepo.save(as);
-			return "UPDATE SUCCESSFULL";
-		} catch (Exception x) {
-			return "UPDATE SCHEDULE FAILED";
-		}
+    @GetMapping("/get/id/{id}")
+    public Doctor getDoctorById(@PathVariable("id") String id) {
+        try {
+            Doctor doctor = new Doctor();
+            DoctorDetails doctorDetails = doctorDetailsRepo.findById(id).get();
+            doctorDetails.setCHEMBAR_ADDRESS(doctorDetails.getCHEMBAR_ADDRESS().replace("|", ","));
+            doctor.setDD(doctorDetails);
+            doctor.setAS(appointmetScheduleRepo.findAppointmentScheduleByDOCTOR_ID(id));
+            return doctor;
+        } catch (Exception x) {
+            return null;
+        }
+    }
 
-	}
+    @GetMapping("/validate/{token}")
+    public Boolean checkTokenValidity(@PathVariable("token") String token) {
+        try {
+            String username = jwtUtills.getUsernameFromToken(token);
+            DoctorLoginDetails doctorLoginDetails = (DoctorLoginDetails) doctorLoginDetailsService
+                    .loadUserByUsername(username);
+            Boolean isValid = jwtUtills.validateJwtToken(token, doctorLoginDetails);
+            return isValid;
+        } catch (Exception x) {
+            return false;
+        }
+    }
 
-	@PutMapping("/update")
-	public String updateDoctor(@RequestBody DoctorDetails dd) {
-		try {
-			doctorDetailsRepo.save(dd);
-			return "UPDATE SUCCESSFUL";
-		} catch (Exception Ex) {
-			return "UPDATE FAILED";
-		}
+    @PostMapping("/addschedule")
+    public String addAppointmetSchedule(@RequestBody AppointmentSchedule as) {
+        UUID appointment_ID = UUID.randomUUID();
+        as.setID(appointment_ID.toString());
+        appointmetScheduleRepo.save(as);
+        return "SUCCESSFULLY ADDED";
 
-	}
+    }
 
-	@DeleteMapping("/deleteschedule/{id}")
-	public String deleteSchedule(@PathVariable("id") String id) {
-		try {
-			appointmetScheduleRepo.deleteById(id);
-			return "SCHEDULE DELETED";
-		} catch (Exception x) {
-			return "DELETE FAILED";
-		}
+    @PutMapping("/updateschedule")
+    public String updateAppointmetSchedule(@RequestBody AppointmentSchedule as) {
+        try {
+            appointmetScheduleRepo.save(as);
+            return "UPDATE SUCCESSFULL";
+        } catch (Exception x) {
+            return "UPDATE SCHEDULE FAILED";
+        }
 
-	}
+    }
+
+    @PutMapping("/update")
+    public String updateDoctor(@RequestBody DoctorDetails dd) {
+        try {
+            doctorDetailsRepo.save(dd);
+            return "UPDATE SUCCESSFUL";
+        } catch (Exception Ex) {
+            return "UPDATE FAILED";
+        }
+
+    }
+
+    @DeleteMapping("/deleteschedule/{id}")
+    public String deleteSchedule(@PathVariable("id") String id) {
+        try {
+            appointmetScheduleRepo.deleteById(id);
+            return "SCHEDULE DELETED";
+        } catch (Exception x) {
+            return "DELETE FAILED";
+        }
+
+    }
 
 }
