@@ -201,6 +201,7 @@ public class DoctorController {
     @PutMapping("/update")
     public String updateDoctor(@RequestBody DoctorDetails dd) {
         try {
+            dd.setCHEMBAR_ADDRESS(dd.getCHEMBAR_ADDRESS().replace(",","|"));
             doctorDetailsRepo.save(dd);
             return "UPDATE SUCCESSFUL";
         } catch (Exception Ex) {
